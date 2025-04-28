@@ -29,7 +29,7 @@ function App() {
             <Route path="/usuario" element={<Usuario />} />
             <Route path="/carrinho" element={<Carrinho />} />
           </Routes>
-          <Footer />
+          {/* <Footer /> */}
         </AuthProvider>
       </Router>
     </>

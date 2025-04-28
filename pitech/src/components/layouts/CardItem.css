@@ -6,7 +6,10 @@
     margin-bottom: 5px;
 }
 
-
+.cont{
+  display: flex;
+  flex-direction: column;
+}
 
 .titulo_container{
     overflow: scroll;
@@ -20,7 +23,6 @@
     color: black;
     font-size: 15px;
 }
-
 
   .titulo_container::-webkit-scrollbar {
     display: none;

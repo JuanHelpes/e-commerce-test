@@ -16,6 +16,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { AuthContext } from "../context/AuthContext";
+import { Radio } from "@mui/material";
 
 const StyledButton = styled(Button)`
   color: #ff8e00;
@@ -88,6 +89,7 @@ const Usuario = () => {
     [],
     dadosEndereco
   );
+
   const handleUserChange = (e) => {
     const { name, value } = e.target;
     setDadosUsuario((prevState) => ({
@@ -265,7 +267,11 @@ const Usuario = () => {
                 label="Confirm-password"
               />
             </FormControl>
-            <StyledButton variant="contained" type="submit">
+            <StyledButton
+              sx={{ borderRadius: "10px" }}
+              variant="contained"
+              type="submit"
+            >
               SALVAR TODAS AS INFORMAÇÕES
             </StyledButton>
           </form>
