@@ -1,26 +1,57 @@
 const usuarioSchema = require("../models/Usuario.js");
+const { v4: uuid } = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.SECRET;
 
+const register = async (req, res) => {
+  const { nome, email, senha } = req.body;
+
+  if (!nome || !email || !senha) {
+    return res.status(400).json({ error: "Preencha todos os campos!" });
+  }
+
+  const userExists = await usuarioSchema.findOne({ email });
+
+  if (userExists) {
+    return res.status(400).json({ error: "Usuário já existe!" });
+  }
+
+  const hashedPassword = bcrypt.hashSync(senha, 12); // Hash the password
+
+  const newUser = new usuarioSchema({
+    _id: uuid(),
+    nome,
+    email,
+    senha: hashedPassword, // Store the hashed password
+  });
+
+  try {
+    await newUser.save();
+    return res.status(201).json({ message: "Usuário criado com sucesso!" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const login = async (req, res) => {
   try {
-    usuarioSchema.findOne({ email: req.body.email }, (err, user) => {
-      if (!user) {
-        return res.status(401).json({ error: "Usuário não encontrado!" });
-      }
+    const user = await usuarioSchema.findOne({ email: req.body.email });
 
-      const isPasswordValid = bcrypt.compareSync(req.body.senha, user.senha);
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não encontrado!" });
+    }
 
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Senha inválida!" });
-      }
-      const token = jwt.sign({ id: user._id }, SECRET_KEY, {
-        expiresIn: 86400,
-      }); // 24 horas
-      return res.status(200).json({ auth: true, token: token });
-    });
+    const isPasswordValid = bcrypt.compareSync(req.body.senha, user.senha);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Senha inválida!" });
+    }
+    const token = jwt.sign({ id: user._id }, SECRET_KEY, {
+      expiresIn: 86400,
+    }); // 24 horas
+    return res.status(200).json({ auth: true, token: token });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -50,4 +81,5 @@ const verifyToken = (req, res, next) => {
 module.exports = {
   login,
   verifyToken,
+  register,
 };
