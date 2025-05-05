@@ -10,13 +10,15 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
+import api from "../../../services/api"; // Importando a instância do Axios
+
 const Registrar = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
 
-  let url = 'http://localhost:3000/';
+  let url = "http://localhost:3000/";
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -35,14 +37,21 @@ const Registrar = () => {
     setPassword(e.target.value);
   };
 
-  const fetchCriaUsuario = () => {
+  const fetchCriaUsuario = async () => {
     var userObj = {
       nome: nome,
       email: email,
       senha: password,
     };
-    var jsonBody = JSON.stringify(userObj);
-    
+
+    const response = await api.post("user/register", userObj);
+    if (response.status === 201) {
+      alert("Usuario Criado com sucesso!");
+    } else {
+      alert("Erro ao criar usuario!");
+    }
+    //var jsonBody = JSON.stringify(userObj);
+
     // const formData = new FormData();
     // formData.append("nome", nome);
     // formData.append("email", email);
@@ -50,24 +59,23 @@ const Registrar = () => {
 
     // console.log(formData)
 
-    console.log("json " + jsonBody)
+    //   console.log("json " + jsonBody)
 
-    fetch(url + 'CriaUsuario', {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    body: jsonBody,
-  })
-    .then((resp) => resp.json())
-    .then((data) => {
-        alert("Usuario Criado")
-        console.log("Resposta do servidor:", data);
-    })
-    .catch((err) => console.log(err));
-};
-
+    //   fetch(url + 'CriaUsuario', {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Accept": "application/json",
+    //   },
+    //   body: jsonBody,
+    // })
+    //   .then((resp) => resp.json())
+    //   .then((data) => {
+    //       alert("Usuario Criado")
+    //       console.log("Resposta do servidor:", data);
+    //   })
+    //   .catch((err) => console.log(err));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

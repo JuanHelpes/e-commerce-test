@@ -12,6 +12,8 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"; // Importe o AuthProvider
 
+import api from "../../../services/api"; // Importando a instância do Axios
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,6 @@ const Login = () => {
   const { login, user } = useContext(AuthContext); // Acessar o contexto
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-
   const navigate = useNavigate();
 
   const handleMouseDownPassword = (event) => {
@@ -34,54 +35,31 @@ const Login = () => {
     setPassword(e.target.value);
   };
 
-  // const realizarLogin = (event) => {
-  //   event.preventDefault();
-
-  //   var userObj = {
-  //     email: email,
-  //     senha: password,
-  //   };
-  //   var jsonBody = JSON.stringify(userObj);
-
-  //   fetch(url + "login", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Accept: "application/json",
-  //     },
-  //     body: jsonBody,
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       const token = data.token;
-  //       const usu_id = data.idUsuario;
-  //       if (token) {
-  //         // logar(token, usu_id);
-  //         // localStorage.setItem("token", token);
-  //         console.log(token);
-  //         // navigate(`/`);
-  //       } else {
-  //         alert(data.mensagem);
-  //         return;
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email === "" || password === "") {
       alert("Preencha todos os campos");
       return;
     }
+
+    // api.post("user/login", { email, password }).then((response) => {
+    //   console.log("data ", response.data);
+    //   if (response.data.mensagem === "Error") {
+    //     alert("Usuário ou senha inválidos");
+    //   } else {
+    //     // Autenticação bem-sucedida
+    //     const token = response.data.token;
+    //     const usu_id = response.data.idUsuario;
+    //     setUser({ usu_id: usu_id, token: token });
+    //     navigate(`/`);
+    //   }
+    // });
+
     const sucess = await login(email, password);
+    console.log("sucess ", sucess);
     if (!sucess) {
       alert("Usuário ou senha inválidos");
-      return;
-    }
-    navigate(`/`);
+    } else navigate(`/`);
   };
 
   return (
@@ -93,14 +71,18 @@ const Login = () => {
               <h1>Login</h1>
               <TextField
                 id="outlined-basic"
-                label="Usuario"
+                label="Email"
                 variant="outlined"
                 margin="dense"
                 type="email"
                 onChange={handleEmailChange}
+                color="warning"
               />
               <FormControl variant="outlined" onChange={handlePasswordChange}>
-                <InputLabel htmlFor="outlined-adornment-password">
+                <InputLabel
+                  htmlFor="outlined-adornment-password"
+                  color="warning"
+                >
                   Password
                 </InputLabel>
                 <OutlinedInput
@@ -119,6 +101,7 @@ const Login = () => {
                     </InputAdornment>
                   }
                   label="Password"
+                  color="warning"
                 />
               </FormControl>
               {/* <TextField
@@ -130,7 +113,7 @@ const Login = () => {
             /> */}
               <div class="input-block">
                 <span class="forgot" onClick={() => navigate(`/registrar`)}>
-                  <a href="#">Não possui conta ? Registre-se !</a>
+                  <a href="#">Não possui conta? Registre-se!</a>
                 </span>
                 <Button variant="contained" type="submit">
                   Entrar

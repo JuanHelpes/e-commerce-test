@@ -8,6 +8,7 @@ const SECRET_KEY = process.env.SECRET;
 const register = async (req, res) => {
   const { nome, email, senha } = req.body;
 
+  console.log(nome, email, senha);
   if (!nome || !email || !senha) {
     return res.status(400).json({ error: "Preencha todos os campos!" });
   }
@@ -29,6 +30,7 @@ const register = async (req, res) => {
 
   try {
     await newUser.save();
+    console.log("Usuário criado com sucesso!");
     return res.status(201).json({ message: "Usuário criado com sucesso!" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -51,7 +53,8 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, SECRET_KEY, {
       expiresIn: 86400,
     }); // 24 horas
-    return res.status(200).json({ auth: true, token: token });
+    console.log(req.body.email);
+    return res.status(200).json({ id: user.id, auth: true, token: token });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
