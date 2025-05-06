@@ -9,7 +9,7 @@ import Notebooks from "../../../assets/notebook.png";
 import Perifericos from "../../../assets/periferico.png";
 import Carousel from "../../layouts/carousel";
 import React, { useEffect } from "react";
-
+import api from "../../../services/api";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Home = () => {
@@ -33,7 +33,10 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchProdutos();
+    api.get("/product").then((response) => {
+      setProdutos(response.data);
+    });
+    //fetchProdutos();
   }, []);
 
   return (
@@ -56,9 +59,9 @@ const Home = () => {
             return (
               <CardItem
                 sx={{}}
-                id={produto.idProduto}
-                titulo={produto.descricao}
-                image={produto.imagem1}
+                id={produto._id}
+                titulo={produto.nome}
+                image={produto.imagemUrl_1}
                 preco={produto.valor}
               />
             );

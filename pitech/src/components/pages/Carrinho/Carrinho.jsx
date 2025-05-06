@@ -7,6 +7,7 @@ import LocalMallIcon from "@mui/icons-material/LocalMall";
 import { AuthContext } from "../context/AuthContext";
 import RocketIcon from "@mui/icons-material/Rocket";
 import { useNavigate } from "react-router-dom";
+import api from "../../../services/api";
 
 const StyledButton = styled(Button)`
   color: #ff8e00;
@@ -46,6 +47,32 @@ const Carrinho = () => {
         setProdutos(data);
       })
       .catch((err) => console.log(err));
+  };
+
+  const getCarrinho = async () => {
+    try {
+      // 1. Buscar os IDs dos produtos no carrinho
+      const response = await api.get(`/carrinho/${user.usu_id}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      const itens = response.data;
+
+      // 2. Buscar todos os produtos em paralelo
+      const promises = itens.map((item) =>
+        api
+          .get(`/product/productById/${item.produtoId}`)
+          .then((res) => res.data)
+      );
+
+      const produtos = await Promise.all(promises);
+
+      setProdutos(produtos);
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    }
   };
 
   const fetchEndereco = async () => {
@@ -90,8 +117,11 @@ const Carrinho = () => {
   };
 
   useEffect(() => {
-    fetchCarrinho();
-    fetchEndereco();
+    getCarrinho();
+    console.log("usu ", user);
+    console.log("prod ", produtos);
+    //fetchCarrinho();
+    //fetchEndereco();
   }, []);
 
   function handleEditar() {
@@ -154,16 +184,16 @@ const Carrinho = () => {
           <div>
             {produtos.length > 0 ? (
               produtos.map((produto) => (
-                <div key={produto.idProduto} id="produto">
+                <div key={produto.produtoId} id="produto">
                   <div class="itens-produtos">
                     <img
                       class="itens-imagem"
-                      src={produto.imagem1}
+                      src={produto.imagemUrl_1}
                       alt="produto"
                     />
                     <div class="itens-texto">
                       <p>
-                        <strong>{produto.descricao}</strong>
+                        <strong>{produto.nome}</strong>
                       </p>
                       <p>
                         Preço: R$ {produto.valor?.toFixed(2).replace(".", ",")}

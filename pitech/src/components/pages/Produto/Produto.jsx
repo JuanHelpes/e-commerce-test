@@ -7,6 +7,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import { AuthContext } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "../../../services/api";
 
 const Produto = () => {
   const [produtos, setProdutos] = useState([]);
@@ -34,7 +35,11 @@ const Produto = () => {
   };
 
   useEffect(() => {
-    fetchProduto();
+    api.get("/product/productById/" + idProduto).then((response) => {
+      setProdutos(response.data);
+      setImagens([response.data.imagemUrl_1, response.data.imagemUrl_2]);
+    });
+    //fetchProduto();
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -66,13 +71,25 @@ const Produto = () => {
       .catch((err) => console.log(err));
   };
 
-  useEffect(() => {
-    fetchProduto();
-  }, []);
-
+  console.log(user);
   const handleCarrinho = () => {
     if (user?.usu_id) {
-      fetchCarrinho();
+      try {
+        api
+          .post("/carrinho/store/" + user.usu_id + "/" + idProduto, null, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          })
+          .then((response) => {
+            console.log(response.data);
+            alert("Produto adicionado ao carrinho!");
+          });
+      } catch (error) {
+        console.log(error);
+        alert("Erro ao adicionar produto ao carrinho!");
+      }
+      // fetchCarrinho();
     } else {
       navigate(`/Login`);
     }
@@ -115,7 +132,7 @@ const Produto = () => {
           </div>
 
           <div className="desc">
-            <h2 className="nome">{produtos[0]?.descricao}</h2>
+            <h2 className="nome">{produtos?.nome}</h2>
 
             <div className="titulos">
               <div className="valor">
@@ -127,7 +144,7 @@ const Produto = () => {
                     </h5>
                   </div>
                   <p className="preco">
-                    <b> R$ {produtos[0]?.valor}</b>
+                    <b> R$ {produtos?.valor}</b>
                   </p>
                 </div>
                 <button
@@ -146,7 +163,7 @@ const Produto = () => {
             <div className="toggle-button">{isOpen ? "▲" : "▼"}</div>
           </div>
           <div className={`product-description ${isOpen ? "open" : ""}`}>
-            <p>{produtos[0]?.sobre}</p>
+            <p>{produtos?.descricao}</p>
           </div>
         </div>
       </div>
