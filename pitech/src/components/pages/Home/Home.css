@@ -25,7 +25,5 @@
 
 
 .titulo_categoria{
-    display: flex;
-    flex-direction: column;
-    text-align: center;
+font-family: "Segoe UI";
 }

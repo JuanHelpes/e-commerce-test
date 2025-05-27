@@ -6,7 +6,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import CardMedia from "@mui/material/CardMedia";
-import { CardActionArea } from "@mui/material";
+import { CardActionArea, Grid } from "@mui/material";
 import Produto from "../pages/Produto/Produto";
 
 import { Link, Route, Routes } from "react-router-dom";
@@ -15,8 +15,8 @@ import { useNavigate } from "react-router-dom";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   color: "white",
-  width: "15%",
-  margin: "10px",
+  width: "100%",
+  height: "100%",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -37,11 +37,9 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const CardItem = (props) => {
   const titulo = props.titulo;
-  // console.log("titulo", titulo);
   const image = props.image;
   const preco = props.preco;
   const idProduto = props.id;
-  console.log("card: " + idProduto);
   const navigate = useNavigate();
 
   function mostraProduto() {
@@ -49,23 +47,30 @@ const CardItem = (props) => {
   }
 
   return (
-    <StyledCard>
-      {/* <div className="cont"> */}
-      <CardContent sx={{ height: "30%" }}>
+    <StyledCard style={{ maxHeight: "450px", maxWidth: "300px" }}>
+      <CardContent>
         <CardActionArea sx={{ ":hover": { backgroundColor: "#ffffff" } }}>
           <CardMedia
             component="img"
+            width="200"
             height="140"
             image={image}
-            style={{ height: "100%", objectFit: "cover" }}
+            style={{
+              height: "90%",
+              width: "90%",
+              maxWidth: "300px",
+              maxHeight: "300px",
+              objectFit: "cover",
+            }}
           />
-          <div className="titulo_container">
+          <Grid overflow={"hide"} height={10} sx={{ height: "100%" }}>
             <h4 className="titulo">{titulo}</h4>
-          </div>
+          </Grid>
         </CardActionArea>
       </CardContent>
-      <p className="valor">R$ {preco}</p>
-      {/* <CardActions> */}
+      <Grid m={"auto"}>
+        <p className="valor">R$ {preco}</p>
+      </Grid>
       <StyledButton
         sx={{ width: "90%" }}
         onClick={() => mostraProduto()}
@@ -73,8 +78,6 @@ const CardItem = (props) => {
       >
         Ver mais
       </StyledButton>
-      {/* </div> */}
-      {/* </CardActions> */}
     </StyledCard>
   );
 };

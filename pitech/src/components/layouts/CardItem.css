@@ -2,7 +2,6 @@
     font-weight: 700;
     font-size: 25px;
     color: #ff8e00;
-    margin-top: auto;
     margin-bottom: 5px;
 }
 
@@ -22,6 +21,7 @@
 .titulo{
     color: black;
     font-size: 15px;
+    font-family: 'Segoe UI';
 }
 
   .titulo_container::-webkit-scrollbar {
