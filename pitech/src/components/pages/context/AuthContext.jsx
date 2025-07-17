@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   let url = "http://localhost:3000/";
 
-  // Função para simular login
+  // Função para login
   const login = async (email, password) => {
     const user = {
       email: email,
