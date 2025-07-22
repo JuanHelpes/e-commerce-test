@@ -1,7 +1,9 @@
-import { Controller, Body, Post, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Body, Post, Get, Param, Patch, Delete, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma, User } from 'generated/prisma';
+import { User } from 'generated/prisma';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { CreateUserDto } from './dto/createUser.dto';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Controller('user')
 export class UserController {
@@ -9,21 +11,27 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Post('create')
-    async createUser(@Body() data: Prisma.UserCreateInput): Promise<User> {
+    async createUser(@Body(new ValidationPipe()) data: CreateUserDto): Promise<User> {
         return this.userService.createUser(data);
     }
 
     @UseGuards(AuthGuard)
     @Get(':id')
-    async getUser(@Param('id') id: string): Promise<User | null> {
+    async getUser(@Param('id') id: string): Promise<Omit<User, 'password'> | null> {
         return this.userService.user({ id });
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('products/:id')
+    async getUserProducts(@Param('id') id: string) {
+        return this.userService.getUserProducts(id);
     }
 
     @UseGuards(AuthGuard)
     @Patch(':id')
     async updateUser(
         @Param('id') id: string,
-        @Body() data: Prisma.UserUpdateInput,
+        @Body(new ValidationPipe()) data: UpdateUserDto,
     ): Promise<User> {
         return this.userService.updateUser({
             where: { id },
