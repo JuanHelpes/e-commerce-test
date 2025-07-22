@@ -11,12 +11,25 @@ export class UserService {
 
     async user(
         userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-    ): Promise<User | null> {
+    ): Promise<Omit<User, 'password'> | null> {
         return this.prisma.user.findUnique({
             where: userWhereUniqueInput,
+            select: {
+                email: true,
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+            }
         });
     }
 
+    async getUserProducts(userId: string) {
+        return this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { products: { select: { id: true, name: true, price: true, description: true, url_image: true, url_image_2: true } } },
+        });
+    }
 
     async createUser(data: Prisma.UserCreateInput) {
         // Hash the password before saving it
