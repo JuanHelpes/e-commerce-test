@@ -4,7 +4,7 @@ Sistema Fullstack de e-commerce desenvolvido com foco em autenticação, carrinh
 
 ## 🧠 Descrição
 
-Este projeto simula um sistema de e-commerce onde usuários podem navegar por produtos cadastrados no banco de dados, criar contas, autenticar-se e gerenciar seus dados pessoais e carrinho de compras. O frontend foi construído com **React + Vite**, utilizando **Material UI** para a interface. O backend é uma **API REST** construída com **NestJS**, utilizando **Prisma** e **MongoDB** para persistência de dados.
+Este projeto simula um sistema de e-commerce onde usuários podem navegar por produtos cadastrados no banco de dados, criar contas, autenticar-se e gerenciar seus dados pessoais e carrinho de compras. O frontend foi construído com **React + Vite**, utilizando **Material UI** para a interface. O backend foi construído com **NestJS**, utilizando **Prisma** e **MongoDB** para persistência de dados.
 
 ## 🚀 Funcionalidades
 
@@ -30,12 +30,6 @@ Este projeto simula um sistema de e-commerce onde usuários podem navegar por pr
 - [MongoDB](https://www.mongodb.com/)
 - [JWT](https://jwt.io/) (para autenticação)
 - [bcrypt] (para hash seguro de senhas)
-
-## 📦 Estrutura Geral
-
-e-commerce-app/
-├── backend/ # API NestJS com Prisma + MongoDB
-└── frontend/ # Aplicação React + Vite + MUI
 
 ## 📌 Observações
 
