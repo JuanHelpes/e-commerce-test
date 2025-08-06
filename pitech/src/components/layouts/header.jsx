@@ -30,7 +30,6 @@ export default function MenuAppBar() {
 
   const navigate = useNavigate();
 
-  console.log(user);
   const handleChange = (event) => {
     setAuth(event.target.checked);
   };

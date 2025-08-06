@@ -8,6 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 import RocketIcon from "@mui/icons-material/Rocket";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
+import { toast, ToastContainer } from "react-toastify";
 
 const StyledButton = styled(Button)`
   color: #ff8e00;
@@ -20,108 +21,58 @@ const StyledButton = styled(Button)`
 `;
 
 const Carrinho = () => {
-  let url = "http://localhost:3000/";
   //   const user = sessionStorage.getItem("userId");
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [produtos, setProdutos] = useState([]);
-  const [dadosEndereco, setDadosEndereco] = useState({
-    cep: "",
-    logradouro: "",
-    numero: "",
-    bairro: "",
-    cidade: "",
-    complemento: "",
-    uf: "",
-  });
-
-  const fetchCarrinho = () => {
-    fetch(url + "carrinho/" + user.usu_id, {
-      method: "GET",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProdutos(data);
-      })
-      .catch((err) => console.log(err));
-  };
+  const [dadosEndereco, setDadosEndereco] = useState({});
 
   const getCarrinho = async () => {
     try {
-      // 1. Buscar os IDs dos produtos no carrinho
-      const response = await api.get(`/carrinho/${user.usu_id}`, {
+      const response = await api.get("/user/products/" + user.usu_id, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       });
-
-      const itens = response.data;
-
-      // 2. Buscar todos os produtos em paralelo
-      const promises = itens.map((item) =>
-        api
-          .get(`/product/productById/${item.produtoId}`)
-          .then((res) => res.data)
-      );
-
-      const produtos = await Promise.all(promises);
-
-      setProdutos(produtos);
+      setProdutos(response.data);
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
     }
   };
 
-  const fetchEndereco = async () => {
-    await fetch(url + "dadosEndereco/" + user.usu_id, {
-      method: "GET",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        const { cep, complemento, numero, logradouro, bairro, cidade, uf } =
-          data[0];
-        setDadosEndereco({
-          cep,
-          complemento,
-          numero,
-          logradouro,
-          bairro,
-          cidade,
-          uf,
-        });
-        console.log(dadosEndereco);
-      })
-      .catch((err) => console.log(err));
+  const getEndereco = async () => {
+    try {
+      const response = await api.get("/user/address/" + user.usu_id, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      setDadosEndereco(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar endereço:", error);
+    }
   };
 
   const fetchRemoverProduto = async (id) => {
-    await fetch(url + "removerProduto/" + id, {
-      method: "DELETE",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        alert("Produto removido");
-        console.log("Resposta do servidor:", data);
-        window.location.reload(true);
-      })
-      .catch((err) => console.log(err));
+    api
+      .patch(
+        "product/" + id,
+        { userId: null },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      )
+      .then(() => {
+        toast.success("Produto removido do carrinho!");
+        getCarrinho();
+      });
   };
 
   useEffect(() => {
     getCarrinho();
-    console.log("usu ", user);
-    console.log("prod ", produtos);
-    //fetchCarrinho();
-    //fetchEndereco();
+    getEndereco();
   }, []);
 
   function handleEditar() {
@@ -130,6 +81,8 @@ const Carrinho = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <div class="grid-carrinho">
         <div class="endereco">
           <div class="endereco-title">
@@ -138,10 +91,10 @@ const Carrinho = () => {
           </div>
           <div class="endereco-dados">
             <p>
-              {dadosEndereco.logradouro}, {dadosEndereco.numero}
+              {dadosEndereco.street}, {dadosEndereco.number}
             </p>
-            <p>{dadosEndereco.bairro}</p>
-            <p>{dadosEndereco.cidade}</p>
+            <p>{dadosEndereco.neighborhood}</p>
+            <p>{dadosEndereco.city}</p>
           </div>
           <div class="editar">
             <a class="editar-link resumo" onClick={() => handleEditar()}>
@@ -157,7 +110,7 @@ const Carrinho = () => {
           <p>
             Valor dos produtos: R$
             {produtos
-              .reduce((acc, produto) => acc + produto.valor, 0)
+              .reduce((acc, produto) => acc + produto.price, 0)
               .toFixed(2)
               .replace(".", ",")}
           </p>
@@ -166,7 +119,7 @@ const Carrinho = () => {
               Valor a vista no <strong>PIX</strong>
             </p>
             <p class="preco-desconto">
-              {(produtos.reduce((acc, produto) => acc + produto.valor, 0) * 0.9)
+              {(produtos.reduce((acc, produto) => acc + produto.price, 0) * 0.9)
                 .toFixed(2)
                 .replace(".", ",")}
             </p>
@@ -184,26 +137,26 @@ const Carrinho = () => {
           <div>
             {produtos.length > 0 ? (
               produtos.map((produto) => (
-                <div key={produto.produtoId} id="produto">
+                <div key={produto.id} id="produto">
                   <div class="itens-produtos">
                     <img
                       class="itens-imagem"
-                      src={produto.imagemUrl_1}
+                      src={produto.url_image}
                       alt="produto"
                     />
                     <div class="itens-texto">
                       <p>
-                        <strong>{produto.nome}</strong>
+                        <strong>{produto.name}</strong>
                       </p>
                       <p>
-                        Preço: R$ {produto.valor?.toFixed(2).replace(".", ",")}
+                        Preço: R$ {produto.price?.toFixed(2).replace(".", ",")}
                       </p>
                     </div>
                   </div>
                   <div class="editar">
                     <a
                       class="remover-link"
-                      onClick={() => fetchRemoverProduto(produto.idCarrinho)}
+                      onClick={() => fetchRemoverProduto(produto.id)}
                     >
                       {" "}
                       REMOVER

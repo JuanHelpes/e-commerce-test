@@ -42,24 +42,15 @@ const Login = () => {
       return;
     }
 
-    // api.post("user/login", { email, password }).then((response) => {
-    //   console.log("data ", response.data);
-    //   if (response.data.mensagem === "Error") {
-    //     alert("Usuário ou senha inválidos");
-    //   } else {
-    //     // Autenticação bem-sucedida
-    //     const token = response.data.token;
-    //     const usu_id = response.data.idUsuario;
-    //     setUser({ usu_id: usu_id, token: token });
-    //     navigate(`/`);
-    //   }
-    // });
-
-    const sucess = await login(email, password);
-    console.log("sucess ", sucess);
-    if (!sucess) {
-      alert("Usuário ou senha inválidos");
-    } else navigate(`/`);
+    try {
+      const success = await login(email, password);
+      console.log("success ", success);
+      if (!success) {
+        alert("Usuário ou senha inválidos");
+      } else navigate(`/`);
+    } catch (error) {
+      console.log("Erro ao fazer login:", error);
+    }
   };
 
   return (

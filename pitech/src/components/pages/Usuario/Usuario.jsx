@@ -16,6 +16,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { AuthContext } from "../context/AuthContext";
+import api from "../../../services/api";
 import { Radio } from "@mui/material";
 
 const StyledButton = styled(Button)`
@@ -53,33 +54,33 @@ const Usuario = () => {
   const [loading, setLoading] = useState(false);
   const { user, logout } = useContext(AuthContext);
   let url = "http://localhost:3000/";
-  // const [dadosUsuario, setDadosUsuario] = useState({
-  //   nome: "",
-  //   email: "",
-  //   senha: "",
-  //   confirmarSenha: "",
-  //   cep: "",
-  //   complmento: "",
-  //   numero: "",
-  // });
 
   const fetchUsuario = async () => {
-    await fetch(url + "dadosUsuario/" + user.usu_id, {
-      method: "GET",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        const { cep, complemento, email, nome, numero } = data[0];
-        setDadosUsuario({ nome, email });
-        if (cep) {
-          fetchAddress(cep, numero, complemento);
-        }
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
+    try {
+      const token = user?.token;
+      const response = await api.get("/user/" + user.usu_id, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDadosUsuario({
+        nome: response.data.name,
+        email: response.data.email,
+        senha: "",
+        confirmarSenha: "",
+      });
+      // setDadosEndereco({
+      //   cep: response.data.cep,
+      //   logradouro: response.data.logradouro,
+      //   numero: response.data.numero,
+      //   bairro: response.data.bairro,
+      //   cidade: response.data.cidade,
+      //   complemento: response.data.complemento,
+      //   uf: response.data.uf,
+      // });
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
+    }
   };
 
   useEffect(
@@ -111,34 +112,58 @@ const Usuario = () => {
   };
 
   const fetchEditUsuario = () => {
-    var userObj = {
-      nome: dadosUsuario.nome,
-      email: dadosUsuario.email,
-      senha: dadosUsuario.senha,
-      cep: dadosEndereco.cep,
-      numero: dadosEndereco.numero,
-      complemento: dadosEndereco.complemento,
-      logradouro: dadosEndereco.logradouro,
-      bairro: dadosEndereco.bairro,
-      cidade: dadosEndereco.cidade,
-      uf: dadosEndereco.uf,
-    };
-    var jsonBody = JSON.stringify(userObj);
+    const token = user?.token;
+    const usu_id = user?.usu_id;
 
-    console.log(jsonBody);
-    fetch(url + "editarUsuarioProprio/" + user.usu_id, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: jsonBody,
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        alert("Usuario Editado");
+    api
+      .patch(
+        "/user/" + usu_id,
+        {
+          name: dadosUsuario.nome,
+          email: dadosUsuario.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        // Atualiza o endereço se necessário
+        if (dadosEndereco.cep) {
+          api
+            .post(
+              "/address/addAddress/" + usu_id,
+              {
+                userId: usu_id,
+                cep: dadosEndereco.cep,
+                street: dadosEndereco.logradouro,
+                number: dadosEndereco.numero,
+                neighborhood: dadosEndereco.bairro,
+                city: dadosEndereco.cidade,
+                complement: dadosEndereco.complemento,
+                state: dadosEndereco.uf,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then((response) => {
+              console.log(response.data);
+            })
+            .catch((error) => {
+              console.error("Erro ao atualizar endereço:", error);
+            });
+        }
+        alert("Dados atualizados com sucesso!");
       })
-      .catch((err) => console.log(err));
+      .catch((error) => {
+        console.error("Erro ao atualizar usuário:", error);
+        alert("Erro ao atualizar usuário!");
+      });
   };
 
   const handleSubmit = (e) => {
@@ -180,7 +205,6 @@ const Usuario = () => {
     []
   );
 
-  console.log(dadosEndereco);
   return (
     <>
       <div class="meus-dados title">

@@ -1,4 +1,5 @@
 import React, { createContext, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 // Crie o contexto
 export const AuthContext = createContext();
@@ -9,24 +10,25 @@ import api from "../../../services/api"; // Importando a instância do Axios
 export const AuthProvider = ({ children }) => {
   // Estado para armazenar a informação de login
   const [user, setUser] = useState(null);
-  let url = "http://localhost:3000/";
 
   // Função para login
   const login = async (email, password) => {
     const user = {
       email: email,
-      senha: password,
+      password: password,
     };
 
     try {
-      const response = await api.post("user/login", user);
+      const response = await api.post("auth/signin", user);
       if (response.status === 401 || response.status === 500) {
         setUser(null);
         return false; // Login falhou
       } else {
         // Autenticação bem-sucedida
-        const token = response.data.token;
-        const usu_id = response.data.id;
+        const token = response.data.access_token;
+        // Decodifica o token JWT para obter o id do usuário
+        const payload = jwtDecode(token);
+        const usu_id = payload.userId || payload.sub;
         setUser({ usu_id: usu_id, token: token });
         return true; // Login bem-sucedido
       }

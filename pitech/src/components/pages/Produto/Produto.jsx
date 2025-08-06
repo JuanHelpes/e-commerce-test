@@ -1,5 +1,5 @@
 import "./Produto.css";
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -8,38 +8,27 @@ import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import { AuthContext } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../../services/api";
+import { ToastContainer, toast } from "react-toastify";
 
 const Produto = () => {
   const [produtos, setProdutos] = useState([]);
   const [imagens, setImagens] = useState([]);
-  let url = "http://localhost:3000/";
   const navigate = useNavigate();
   const location = useLocation();
   const idProduto = location.state?.id;
   const { user } = useContext(AuthContext);
 
-  const fetchProduto = () => {
-    fetch(url + "produto/" + idProduto, {
-      method: "GET",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProdutos(data);
-        setImagens([data[0].imagem1, data[0].imagem2]);
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
-  };
-
   useEffect(() => {
-    api.get("/product/productById/" + idProduto).then((response) => {
+    api.get("/product/" + idProduto).then((response) => {
       setProdutos(response.data);
-      setImagens([response.data.imagemUrl_1, response.data.imagemUrl_2]);
+      const imagensArray = [response.data.url_image, response.data.url_image];
+      if (response.data?.url_image_2) {
+        console.log(response.data.url_image_2);
+        imagensArray.pop();
+        imagensArray.push(response.data.url_image_2);
+      }
+      setImagens(imagensArray);
     });
-    //fetchProduto();
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -48,50 +37,36 @@ const Produto = () => {
     setIsOpen(!isOpen);
   };
 
-  const fetchCarrinho = () => {
-    var data = {
-      user: user.usu_id,
-      produto: idProduto,
-    };
-    var jsonBody = JSON.stringify(data);
-    console.log(jsonBody);
-    fetch(url + "adicionaProduto/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: jsonBody,
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        alert("Produto adicionado ao carrinho!");
-        console.log("Resposta do servidor:", data);
-      })
-      .catch((err) => console.log(err));
-  };
+  const fetchCarrinho = () => {};
 
-  console.log(user);
   const handleCarrinho = () => {
     if (user?.usu_id) {
       try {
         api
-          .post("/carrinho/store/" + user.usu_id + "/" + idProduto, null, {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
+          .patch(
+            "/product/" + idProduto,
+            {
+              userId: user.usu_id,
             },
-          })
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            }
+          )
           .then((response) => {
-            console.log(response.data);
-            alert("Produto adicionado ao carrinho!");
+            toast.success("Produto adicionado ao carrinho!");
           });
       } catch (error) {
-        console.log(error);
-        alert("Erro ao adicionar produto ao carrinho!");
+        console.error("Erro ao adicionar produto ao carrinho:", error);
+        toast.error("Erro ao adicionar produto ao carrinho.");
       }
       // fetchCarrinho();
     } else {
-      navigate(`/Login`);
+      toast.error(
+        "Você precisa estar logado para adicionar produtos ao carrinho."
+      );
+      //navigate(`/Login`);
     }
   };
 
@@ -117,14 +92,25 @@ const Produto = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
+  // Função para formatar o preço em moeda brasileira
+  const formatarMoeda = (valor) => {
+    if (!valor && valor !== 0) return "";
+    return valor.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+    });
+  };
+
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="geral">
         <div className="produto">
           <div className="layout">
             <Slider {...settings}>
-              {imagens.map((produto) => (
-                <li>
+              {imagens.map((produto, idx) => (
+                <li key={idx}>
                   <img width={500} src={produto} />
                 </li>
               ))}
@@ -132,7 +118,7 @@ const Produto = () => {
           </div>
 
           <div className="desc">
-            <h2 className="nome">{produtos?.nome}</h2>
+            <h2 className="nome">{produtos?.name}</h2>
 
             <div className="titulos">
               <div className="valor">
@@ -144,7 +130,7 @@ const Produto = () => {
                     </h5>
                   </div>
                   <p className="preco">
-                    <b> R$ {produtos?.valor}</b>
+                    <b>{formatarMoeda(produtos?.price)}</b>
                   </p>
                 </div>
                 <button
@@ -163,7 +149,7 @@ const Produto = () => {
             <div className="toggle-button">{isOpen ? "▲" : "▼"}</div>
           </div>
           <div className={`product-description ${isOpen ? "open" : ""}`}>
-            <p>{produtos?.descricao}</p>
+            <p>{produtos?.description}</p>
           </div>
         </div>
       </div>

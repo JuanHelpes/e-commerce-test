@@ -10,43 +10,16 @@ import Perifericos from "../../../assets/periferico.png";
 import Carousel from "../../layouts/carousel";
 import React, { useEffect } from "react";
 import api from "../../../services/api";
-import {
-  Box,
-  Card,
-  Container,
-  Grid,
-  Typography,
-  useTheme,
-  styled,
-  useMediaQuery,
-} from "@mui/material";
+import { Box, Grid, styled } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Home = () => {
   const [produtos, setProdutos] = React.useState([]);
 
-  let url = "http://localhost:3000/";
-
-  const fetchProdutos = () => {
-    fetch(url + "produtos/", {
-      method: "GET",
-      headers: {
-        "Content-type": "aplication/json",
-      },
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProdutos(data);
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
-  };
-
   useEffect(() => {
     api.get("/product").then((response) => {
       setProdutos(response.data);
     });
-    //fetchProdutos();
   }, []);
 
   const StyledHome = styled("div")(() => ({
@@ -56,21 +29,11 @@ const Home = () => {
     flexDirection: "column",
     alignItems: "center",
   }));
-  const theme = useTheme();
 
-  const isXs = useMediaQuery(theme.breakpoints.down("sm")); // <600 px
   return (
     <>
       <StyledHome>
         <Carousel />
-        {/* <div className="cards_categoria">
-        <CardMenu nome="Cadeiras" image={Cadeiras} />
-        <CardMenu nome="Computadores" image={Computadores} />
-        <CardMenu nome="Games" image={Games} />
-        <CardMenu nome="Hardware" image={Hardware} />
-        <CardMenu nome="Notebooks" image={Notebooks} />
-        <CardMenu nome="Perifericos" image={Perifericos} />
-      </div> */}
         <Box
           display={"flex"}
           alignItems={"center"}
@@ -130,13 +93,14 @@ const Home = () => {
                   xs={6}
                   md={4}
                   lg={2}
-                  key={produto._id}
+                  key={produto.id}
+                  m={1}
                 >
                   <CardItem
-                    id={produto._id}
-                    titulo={produto.nome}
-                    image={produto.imagemUrl_1}
-                    preco={produto.valor}
+                    id={produto.id}
+                    titulo={produto.name}
+                    image={produto.url_image}
+                    preco={produto.price}
                   />
                 </Grid>
               );
