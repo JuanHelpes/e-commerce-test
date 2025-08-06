@@ -25,10 +25,53 @@ export class UserService {
     }
 
     async getUserProducts(userId: string) {
-        return this.prisma.user.findUnique({
+        const user = await this.prisma.user.findUnique({
             where: { id: userId },
-            include: { products: { select: { id: true, name: true, price: true, description: true, url_image: true, url_image_2: true } } },
+            select: {
+                products: {
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        description: true,
+                        url_image: true,
+                        url_image_2: true,
+                    }
+                }
+            }
         });
+        return user?.products || [];
+    }
+
+    async removeUserProduct(userId: string, productId: string) {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                products: {
+                    disconnect: { id: productId },
+                },
+            },
+        });
+    }
+
+    async getUserAddress(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                addresses: {
+                    select: {
+                        id: true,
+                        street: true,
+                        city: true,
+                        state: true,
+                        number: true,
+                        neighborhood: true,
+                        complement: true,
+                    }
+                }
+            }
+        });
+        return user?.addresses || [];
     }
 
     async createUser(data: Prisma.UserCreateInput) {

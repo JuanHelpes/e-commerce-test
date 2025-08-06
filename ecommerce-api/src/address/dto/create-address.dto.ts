@@ -4,5 +4,6 @@ export class CreateAddressDto {
     state: string;
     cep: string;
     number: string;
+    neighborhood: string;
     complement: string
 }

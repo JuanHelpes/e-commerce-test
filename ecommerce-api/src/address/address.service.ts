@@ -9,6 +9,24 @@ export class AddressService {
   @Inject()
   private readonly prisma: PrismaService;
 
+  async addAddress(createAddressDto: CreateAddressDto, userId: string) {
+    const existingAddress = await this.prisma.address.findFirst({
+      where: { userId: userId }
+    });
+    if (existingAddress) {
+      return await this.prisma.address.update({
+        where: { id: existingAddress.id },
+        data: { ...createAddressDto, userId },
+      });
+
+    } else {
+      // If no existing address, create a new one
+      return await this.prisma.address.create({
+        data: { ...createAddressDto, userId },
+      });
+    }
+  }
+
   async create(createAddressDto: CreateAddressDto, userId: string) {
     return await this.prisma.address.create({
       data: { ...createAddressDto, userId },

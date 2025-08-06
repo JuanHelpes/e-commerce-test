@@ -28,6 +28,18 @@ export class UserController {
     }
 
     @UseGuards(AuthGuard)
+    @Get('address/:id')
+    async getUserAddress(@Param('id') id: string) {
+        return this.userService.getUserAddress(id);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete('removeProduct/:id/:productId')
+    async removeUserProduct(@Param('id') id: string, @Param('productId') productId: string) {
+        return this.userService.removeUserProduct(id, productId);
+    }
+
+    @UseGuards(AuthGuard)
     @Patch(':id')
     async updateUser(
         @Param('id') id: string,

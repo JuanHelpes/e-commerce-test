@@ -8,6 +8,12 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class AddressController {
   constructor(private readonly addressService: AddressService) { }
 
+  @Post('addAddress/:userid')
+  @UseGuards(AuthGuard)
+  addAddress(@Body() createAddressDto: CreateAddressDto, @Param('userid') userId: string) {
+    return this.addressService.addAddress(createAddressDto, userId);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
   create(@Body() createAddressDto: CreateAddressDto, @Request() req: any) {
