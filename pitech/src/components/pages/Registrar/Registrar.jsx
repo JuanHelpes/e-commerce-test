@@ -11,14 +11,13 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import api from "../../../services/api"; // Importando a instância do Axios
+import { toast, ToastContainer } from "react-toastify";
 
 const Registrar = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
-
-  let url = "http://localhost:3000/";
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -39,16 +38,16 @@ const Registrar = () => {
 
   const fetchCriaUsuario = async () => {
     var userObj = {
-      nome: nome,
+      name: nome,
       email: email,
-      senha: password,
+      password: password,
     };
 
-    const response = await api.post("user/register", userObj);
+    const response = await api.post("user/create", userObj);
     if (response.status === 201) {
-      alert("Usuario Criado com sucesso!");
+      toast.success("Usuario Criado com sucesso!");
     } else {
-      alert("Erro ao criar usuario!");
+      toast.error("Erro ao criar usuario!");
     }
     //var jsonBody = JSON.stringify(userObj);
 
@@ -84,6 +83,7 @@ const Registrar = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div class="center">
         <div class="container">
           <div class="left">

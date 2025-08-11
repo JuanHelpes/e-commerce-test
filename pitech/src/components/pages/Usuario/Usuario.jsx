@@ -17,7 +17,7 @@ import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { AuthContext } from "../context/AuthContext";
 import api from "../../../services/api";
-import { Radio } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
 
 const StyledButton = styled(Button)`
   color: #ff8e00;
@@ -37,8 +37,6 @@ const Usuario = () => {
   const [dadosUsuario, setDadosUsuario] = useState({
     nome: "",
     email: "",
-    senha: "",
-    confirmarSenha: "",
   });
   const [dadosEndereco, setDadosEndereco] = useState({
     cep: "",
@@ -53,7 +51,6 @@ const Usuario = () => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const { user, logout } = useContext(AuthContext);
-  let url = "http://localhost:3000/";
 
   const fetchUsuario = async () => {
     try {
@@ -66,18 +63,19 @@ const Usuario = () => {
       setDadosUsuario({
         nome: response.data.name,
         email: response.data.email,
-        senha: "",
-        confirmarSenha: "",
       });
-      // setDadosEndereco({
-      //   cep: response.data.cep,
-      //   logradouro: response.data.logradouro,
-      //   numero: response.data.numero,
-      //   bairro: response.data.bairro,
-      //   cidade: response.data.cidade,
-      //   complemento: response.data.complemento,
-      //   uf: response.data.uf,
-      // });
+      if (response.data.addresses) {
+        const address = response.data.addresses; // Pega o primeiro endereço
+        setDadosEndereco({
+          cep: address.cep || "",
+          logradouro: address.street || "",
+          numero: address.number || "",
+          bairro: address.neighborhood || "",
+          cidade: address.city || "",
+          complemento: address.complement || "",
+          uf: address.state || "",
+        });
+      }
     } catch (error) {
       console.error("Erro ao buscar usuário:", error);
     }
@@ -158,11 +156,11 @@ const Usuario = () => {
               console.error("Erro ao atualizar endereço:", error);
             });
         }
-        alert("Dados atualizados com sucesso!");
+        toast.success("Dados atualizados com sucesso!");
       })
       .catch((error) => {
         console.error("Erro ao atualizar usuário:", error);
-        alert("Erro ao atualizar usuário!");
+        toast.error("Erro ao atualizar usuário!");
       });
   };
 
@@ -195,7 +193,6 @@ const Usuario = () => {
           logradouro,
           uf,
         });
-        // console.log(response.data);
       } catch (e) {
         console.log(e);
       } finally {
@@ -207,6 +204,7 @@ const Usuario = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div class="meus-dados title">
         <PersonIcon color="warning"></PersonIcon>
         <h2>MEUS DADOS</h2>
@@ -239,7 +237,7 @@ const Usuario = () => {
               onChange={handleUserChange}
               value={dadosUsuario ? dadosUsuario.email : ""}
             />
-            <FormControl
+            {/* <FormControl
               fullWidth
               sx={{ m: 1 }}
               variant="outlined"
@@ -264,8 +262,8 @@ const Usuario = () => {
                 }
                 label="Password"
               />
-            </FormControl>
-            <FormControl
+            </FormControl> */}
+            {/* <FormControl
               fullWidth
               sx={{ m: 1 }}
               variant="outlined"
@@ -290,7 +288,7 @@ const Usuario = () => {
                 }
                 label="Confirm-password"
               />
-            </FormControl>
+            </FormControl> */}
             <StyledButton
               sx={{ borderRadius: "10px" }}
               variant="contained"
