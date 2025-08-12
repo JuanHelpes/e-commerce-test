@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo-ecommerce
+    ports:
+      - '27017:27017'
+    command: ['mongod', '--replSet', 'rs0', '--bind_ip_all']
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - net-ecommerce
+
+networks:
+  net-ecommerce:
+    external: true
+
+volumes:
+  mongo_data:
