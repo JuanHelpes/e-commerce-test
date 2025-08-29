@@ -1,7 +1,7 @@
 import { Controller, Body, Post, Get, Param, Patch, Delete, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'generated/prisma';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 
